@@ -128,3 +128,6 @@ linkedPlanD.id='plan-d-dec26';linkedPlanD.title='Plan D';
 linkedPlanD.legs.forEach(l=>l.id=l.id.replace('c-new','d-new'));
 Object.assign(linkedPlanD.legs.find(l=>l.from==='SJO'&&l.to==='SCL'),{date:'2026-12-26',arrival:'2026-12-27',airline:'LATAM LA2409 / LA2697',price:363.26,currency:'USD',originalPrice:360267,originalCurrency:'CLP',hours:19+5/60,stops:1,note:'16:55–次日15:00；经 LIM（利马），过夜停留11h55m。SJO→LIM 16:55–21:40；LIM→SCL 次日09:35–15:00。'});
 initialPlans.push(linkedPlanD);
+
+function cleanFlightNote(note){return note.replace(/，?同价/g,'').replace(/。/g,' ').trim();}
+initialPlans.forEach(p=>p.legs.forEach(l=>l.note=cleanFlightNote(l.note)));

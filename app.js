@@ -1,4 +1,4 @@
-import {initialPlans,airports,validPlan,screenshotPlanC,linkedPlanD} from './seed.js?v=20261024-5';
+import {initialPlans,airports,validPlan,screenshotPlanC,linkedPlanD} from './seed.js?v=20261024-6';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)],clone=x=>structuredClone(x), uid=()=>crypto.randomUUID(),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let config;try{config=JSON.parse(localStorage.getItem('southbound-config')||'null')}catch{}config||={name:'我',url:'',key:'',room:''};config={...config,...(window.TRIP_CONFIG||{})};
 const hash=new URLSearchParams(location.hash.slice(1));if(hash.has('room')){config={...config,room:hash.get('room')||'',url:hash.get('url')||config.url,key:hash.get('key')||config.key};}
@@ -114,6 +114,8 @@ function removePlanC(plans){for(let i=plans.length-1;i>=0;i--){if(plans[i].id===
 if(!localStorage.getItem(`${storageKey()}:remove-plan-c-v1`)){removePlanC(state.plans);localStorage.setItem(`${storageKey()}:remove-plan-c-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 if(!localStorage.getItem(`${storageKey()}:plan-c-screenshots-v1`)){if(!state.plans.some(p=>p.id===screenshotPlanC.id))state.plans.push(clone(screenshotPlanC));localStorage.setItem(`${storageKey()}:plan-c-screenshots-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 if(!localStorage.getItem(`${storageKey()}:plan-d-link-v1`)){if(!state.plans.some(p=>p.id===linkedPlanD.id))state.plans.push(clone(linkedPlanD));localStorage.setItem(`${storageKey()}:plan-d-link-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
+function cleanFlightNote(note){return note.replace(/，?同价/g,'').replace(/。/g,' ').trim();}
+if(!localStorage.getItem(`${storageKey()}:notes-spacing-v1`)){state.plans.forEach(p=>p.legs.forEach(l=>l.note=cleanFlightNote(l.note)));localStorage.setItem(`${storageKey()}:notes-spacing-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 let revision=Number(localStorage.getItem(`${storageKey()}:revision`)||0),dirty=localStorage.getItem(`${storageKey()}:dirty`)==='1',busy=false,blocked=false,connected=false,filter='all',sort='manual',editing=null,timer;
 const total=p=>p.legs.reduce((sum,l)=>sum+toUSD(l.price,l.currency),0);
 const toUSD=(price,currency)=>currency==='CLP'?price/state.rates.clp:currency==='CNY'?price/state.rates.cny:price;
@@ -140,7 +142,7 @@ function flightRows(legs){return groupedLegs(legs).map(group=>{
  const line=(l,i,text)=>`<div class="group-line">${pair?`<span class="direction">${i===0?'去':'回'}</span> `:''}${text}</div>`;
  const price='US$'+Math.round(group.reduce((n,l)=>n+toUSD(l.price,l.currency),0)).toLocaleString('en-US');
  const urls=[...new Set(group.map(l=>l.url).filter(Boolean))];
- return `<tr><td>${group.map((l,i)=>line(l,i,esc(l.date)+(l.arrival?`<small>到达 ${esc(l.arrival)}</small>`:''))).join('')}</td><td>${group.map((l,i)=>line(l,i,`${esc(l.from)} → ${esc(l.to)}`)).join('')}</td><td>${group.map((l,i)=>line(l,i,esc(/待核实|待查/.test(l.airline)?'':l.airline)||'—')).join('')}</td><td>${group.some(l=>l.price)?price:'—'}${group.find(l=>l.source)?.source?'（'+esc(group.find(l=>l.source).source)+'）':''}${pair?'<small>去回合计 / 人</small>':''}</td><td class="transfer">${group.map((l,i)=>line(l,i,`${l.stops?l.stops+' 次中转':l.hours?'直飞':'—'}${l.hours?' · '+Math.floor(l.hours)+'h '+Math.round(l.hours%1*60)+'m':''}${l.note&&!/待核实|待查|暂排/.test(l.note)?`<small>${esc(l.note)}</small>`:''}`)).join('')}</td></tr>`;
+ return `<tr><td>${group.map((l,i)=>line(l,i,esc(l.date)+(l.arrival?`<small>到达 ${esc(l.arrival)}</small>`:''))).join('')}</td><td>${group.map((l,i)=>line(l,i,`${esc(l.from)} → ${esc(l.to)}`)).join('')}</td><td>${group.map((l,i)=>line(l,i,esc(/待核实|待查/.test(l.airline)?'':l.airline)||'—')).join('')}</td><td>${group.some(l=>l.price)?price:'—'}${group.find(l=>l.source)?.source?'（'+esc(group.find(l=>l.source).source)+'）':''}${pair?'<small>去回合计 / 人</small>':''}</td><td class="transfer">${group.map((l,i)=>line(l,i,`${l.stops?l.stops+' 次中转':l.hours?'直飞':'—'}${l.hours?' · '+Math.floor(l.hours)+'h '+Math.round(l.hours%1*60)+'m':''}${l.note&&!/待核实|待查|暂排/.test(l.note)?`<small>${esc(cleanFlightNote(l.note))}</small>`:''}`)).join('')}</td></tr>`;
  }).join('');}
 function render(){
  $('#travelers').value=state.travelers;$('#display-currency').value=state.currency;$('#count').textContent=state.plans.length;
