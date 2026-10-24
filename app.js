@@ -1,4 +1,4 @@
-import {initialPlans,airports,validPlan,screenshotPlanC} from './seed.js?v=20261024-4';
+import {initialPlans,airports,validPlan,screenshotPlanC,linkedPlanD} from './seed.js?v=20261024-5';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)],clone=x=>structuredClone(x), uid=()=>crypto.randomUUID(),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let config;try{config=JSON.parse(localStorage.getItem('southbound-config')||'null')}catch{}config||={name:'我',url:'',key:'',room:''};config={...config,...(window.TRIP_CONFIG||{})};
 const hash=new URLSearchParams(location.hash.slice(1));if(hash.has('room')){config={...config,room:hash.get('room')||'',url:hash.get('url')||config.url,key:hash.get('key')||config.key};}
@@ -113,6 +113,7 @@ function removePlanC(plans){for(let i=plans.length-1;i>=0;i--){if(plans[i].id===
 
 if(!localStorage.getItem(`${storageKey()}:remove-plan-c-v1`)){removePlanC(state.plans);localStorage.setItem(`${storageKey()}:remove-plan-c-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 if(!localStorage.getItem(`${storageKey()}:plan-c-screenshots-v1`)){if(!state.plans.some(p=>p.id===screenshotPlanC.id))state.plans.push(clone(screenshotPlanC));localStorage.setItem(`${storageKey()}:plan-c-screenshots-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
+if(!localStorage.getItem(`${storageKey()}:plan-d-link-v1`)){if(!state.plans.some(p=>p.id===linkedPlanD.id))state.plans.push(clone(linkedPlanD));localStorage.setItem(`${storageKey()}:plan-d-link-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 let revision=Number(localStorage.getItem(`${storageKey()}:revision`)||0),dirty=localStorage.getItem(`${storageKey()}:dirty`)==='1',busy=false,blocked=false,connected=false,filter='all',sort='manual',editing=null,timer;
 const total=p=>p.legs.reduce((sum,l)=>sum+toUSD(l.price,l.currency),0);
 const toUSD=(price,currency)=>currency==='CLP'?price/state.rates.clp:currency==='CNY'?price/state.rates.cny:price;
