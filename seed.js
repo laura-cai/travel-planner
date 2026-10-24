@@ -115,3 +115,7 @@ function simplifyTripNotes(plans){
 }
 
 simplifyTripNotes(initialPlans);
+
+function removePlanC(plans){for(let i=plans.length-1;i>=0;i--){if(plans[i].id==='bay-budget')plans.splice(i,1);}}
+
+removePlanC(initialPlans);
