@@ -95,6 +95,20 @@ if(!localStorage.getItem(`${storageKey()}:qunar-dec30-3000-v1`)){applyQunarDec30
 function applyQunarSimplePrice(plans){plans.forEach(p=>p.legs.forEach(l=>{if(l.from==='SCL'&&l.to==='SJO'&&l.date==='2026-12-30')Object.assign(l,{airline:'',arrival:'',note:'',hours:0,stops:0});}));}
 
 if(!localStorage.getItem(`${storageKey()}:qunar-price-only-v1`)){applyQunarSimplePrice(state.plans);localStorage.setItem(`${storageKey()}:qunar-price-only-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
+function simplifyTripNotes(plans){
+ plans.forEach(p=>p.legs.forEach(l=>{
+ if(l.from==='SCL'&&l.to==='SJO'&&l.date==='2026-12-30'){l.source='去哪儿';l.note='';}
+ else if(l.from==='SCL'&&l.to==='IPC'&&l.date==='2026-12-22')l.note='08:35–11:55；仅含随身小包。';
+ else if(l.from==='IPC'&&l.to==='SCL'&&l.date==='2026-12-24')l.note='14:30–21:10。';
+ else if(p.id==='rdu-comfort'&&l.from==='RDU'&&l.to==='SCL')l.note='16:50–次日08:50；经 IAH（休斯顿）。随身行李1件；首件托运US$90。';
+ else if(p.id==='rdu-comfort'&&l.from==='SJO'&&l.to==='RDU')l.note='15:37–23:59；经 MIA（迈阿密）。随身行李1件；首件托运US$55。';
+ else if(p.id==='rdu-budget'&&l.from==='RDU'&&l.to==='SCL')l.note='经 CLT（夏洛特）、MIA（迈阿密）。';
+ else if(p.id==='rdu-budget'&&l.from==='SJO'&&l.to==='RDU')l.note='15:37–23:59；经 MIA（迈阿密）。';
+ else if(/待查|暂排|截图|核实|参考|用户|报价/.test(l.note))l.note='';
+ }));
+}
+
+if(!localStorage.getItem(`${storageKey()}:simple-notes-qunar-label-v1`)){simplifyTripNotes(state.plans);localStorage.setItem(`${storageKey()}:simple-notes-qunar-label-v1`,'1');localStorage.setItem(storageKey(),JSON.stringify(state));}
 let revision=Number(localStorage.getItem(`${storageKey()}:revision`)||0),dirty=localStorage.getItem(`${storageKey()}:dirty`)==='1',busy=false,blocked=false,connected=false,filter='all',sort='manual',editing=null,timer;
 const total=p=>p.legs.reduce((sum,l)=>sum+toUSD(l.price,l.currency),0);
 const toUSD=(price,currency)=>currency==='CLP'?price/state.rates.clp:currency==='CNY'?price/state.rates.cny:price;
@@ -121,7 +135,7 @@ function flightRows(legs){return groupedLegs(legs).map(group=>{
  const line=(l,i,text)=>`<div class="group-line">${pair?`<span class="direction">${i===0?'去':'回'}</span> `:''}${text}</div>`;
  const price='US$'+Math.round(group.reduce((n,l)=>n+toUSD(l.price,l.currency),0)).toLocaleString('en-US');
  const urls=[...new Set(group.map(l=>l.url).filter(Boolean))];
- return `<tr><td>${group.map((l,i)=>line(l,i,esc(l.date)+(l.arrival?`<small>到达 ${esc(l.arrival)}</small>`:''))).join('')}</td><td>${group.map((l,i)=>line(l,i,`${esc(l.from)} → ${esc(l.to)}`)).join('')}</td><td>${group.map((l,i)=>line(l,i,esc(/待核实|待查/.test(l.airline)?'':l.airline)||'—')).join('')}</td><td>${group.some(l=>l.price)?price:'待填写'}${pair?'<small>去回合计 / 人</small>':''}</td><td class="transfer">${group.map((l,i)=>line(l,i,`${l.stops?l.stops+' 次中转':l.hours?'直飞':'—'}${l.hours?' · '+Math.floor(l.hours)+'h '+Math.round(l.hours%1*60)+'m':''}${l.note&&!/待核实|待查|暂排/.test(l.note)?`<small>${esc(l.note)}</small>`:''}`)).join('')}</td></tr>`;
+ return `<tr><td>${group.map((l,i)=>line(l,i,esc(l.date)+(l.arrival?`<small>到达 ${esc(l.arrival)}</small>`:''))).join('')}</td><td>${group.map((l,i)=>line(l,i,`${esc(l.from)} → ${esc(l.to)}`)).join('')}</td><td>${group.map((l,i)=>line(l,i,esc(/待核实|待查/.test(l.airline)?'':l.airline)||'—')).join('')}</td><td>${group.some(l=>l.price)?price:'—'}${group.find(l=>l.source)?.source?'（'+esc(group.find(l=>l.source).source)+'）':''}${pair?'<small>去回合计 / 人</small>':''}</td><td class="transfer">${group.map((l,i)=>line(l,i,`${l.stops?l.stops+' 次中转':l.hours?'直飞':'—'}${l.hours?' · '+Math.floor(l.hours)+'h '+Math.round(l.hours%1*60)+'m':''}${l.note&&!/待核实|待查|暂排/.test(l.note)?`<small>${esc(l.note)}</small>`:''}`)).join('')}</td></tr>`;
  }).join('');}
 function render(){
  $('#travelers').value=state.travelers;$('#display-currency').value=state.currency;$('#count').textContent=state.plans.length;

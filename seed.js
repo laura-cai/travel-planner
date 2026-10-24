@@ -100,3 +100,18 @@ applyQunarDec30Quote(initialPlans);
 function applyQunarSimplePrice(plans){plans.forEach(p=>p.legs.forEach(l=>{if(l.from==='SCL'&&l.to==='SJO'&&l.date==='2026-12-30')Object.assign(l,{airline:'',arrival:'',note:'',hours:0,stops:0});}));}
 
 applyQunarSimplePrice(initialPlans);
+
+function simplifyTripNotes(plans){
+ plans.forEach(p=>p.legs.forEach(l=>{
+ if(l.from==='SCL'&&l.to==='SJO'&&l.date==='2026-12-30'){l.source='去哪儿';l.note='';}
+ else if(l.from==='SCL'&&l.to==='IPC'&&l.date==='2026-12-22')l.note='08:35–11:55；仅含随身小包。';
+ else if(l.from==='IPC'&&l.to==='SCL'&&l.date==='2026-12-24')l.note='14:30–21:10。';
+ else if(p.id==='rdu-comfort'&&l.from==='RDU'&&l.to==='SCL')l.note='16:50–次日08:50；经 IAH（休斯顿）。随身行李1件；首件托运US$90。';
+ else if(p.id==='rdu-comfort'&&l.from==='SJO'&&l.to==='RDU')l.note='15:37–23:59；经 MIA（迈阿密）。随身行李1件；首件托运US$55。';
+ else if(p.id==='rdu-budget'&&l.from==='RDU'&&l.to==='SCL')l.note='经 CLT（夏洛特）、MIA（迈阿密）。';
+ else if(p.id==='rdu-budget'&&l.from==='SJO'&&l.to==='RDU')l.note='15:37–23:59；经 MIA（迈阿密）。';
+ else if(/待查|暂排|截图|核实|参考|用户|报价/.test(l.note))l.note='';
+ }));
+}
+
+simplifyTripNotes(initialPlans);
