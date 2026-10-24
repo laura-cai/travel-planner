@@ -1,4 +1,4 @@
-import {initialPlans,airports,validPlan} from './seed.js';
+import {initialPlans,airports,validPlan} from './seed.js?v=20261024-2';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)],clone=x=>structuredClone(x), uid=()=>crypto.randomUUID(),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let config;try{config=JSON.parse(localStorage.getItem('southbound-config')||'null')}catch{}config||={name:'我',url:'',key:'',room:''};config={...config,...(window.TRIP_CONFIG||{})};
 const hash=new URLSearchParams(location.hash.slice(1));if(hash.has('room')){config={...config,room:hash.get('room')||'',url:hash.get('url')||config.url,key:hash.get('key')||config.key};}
